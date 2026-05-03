@@ -13,13 +13,20 @@ sys.path.append(r'C:\Users\Chethan\Desktop\AI_IDS_PROJECT\src')
 from preprocess import IDSPreprocessor, COLUMNS, ATTACK_CATEGORY
 
 class IDSPredictor:
-    def __init__(self, model_path=r'C:\Users\Chethan\Desktop\AI_IDS_PROJECT\models\best_model.pkl',
-                 preprocessor_path=r'C:\Users\Chethan\Desktop\AI_IDS_PROJECT\models\preprocessor.pkl'):
+    def __init__(self, 
+    model_path=None,
+    preprocessor_path=None):
+        if model_path is None:
+            root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            model_path = os.path.join(root, 'models', 'best_model.pkl')
+        if preprocessor_path is None:
+            root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            preprocessor_path = os.path.join(root, 'models', 'preprocessor.pkl')
+    
         print("[*] Loading IDS model...")
         self.model = joblib.load(model_path)
-        self.preprocessor = IDSPreprocessor.load(preprocessor_path)
+        self.preprocessor = IDSPredictor.load(preprocessor_path)
         print("[+] Model loaded and ready!")
-
     def predict_from_file(self, filepath):
         """Predict on a full test file."""
         df = self.preprocessor.load_data(filepath)
