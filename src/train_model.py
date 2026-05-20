@@ -122,27 +122,50 @@ class IDSModelTrainer:
 
 
 def main():
-    # Step 1: Preprocess data
-    preprocessor = IDSPreprocessor()
-    X_train, X_test, y_train, y_test, df = preprocessor.preprocess(
-        r'C:\Users\Chethan\Desktop\AI_IDS_Project\data\raw\KDDTrain+.txt'
-    )
-    preprocessor.save(r'C:\Users\Chethan\Desktop\AI_IDS_Project\models\preprocessor.pkl')
+    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DATA_PATH        = os.path.join(ROOT, 'data', 'raw', 'KDDTrain+.txt')
+    MODEL_PATH       = os.path.join(ROOT, 'models', 'best_model.pkl')
+    PREPROCESSOR_PATH= os.path.join(ROOT, 'models', 'preprocessor.pkl')
+    RESULTS_PATH     = os.path.join(ROOT, 'models', 'results.json')
 
-    # Step 2: Train models
+    # Read options from environment variables
+    detailed  = os.environ.get('DETAILED_ANALYSIS', '0') == '1'
+    save      = os.environ.get('SAVE_MODELS', '1')       == '1'
+    crossval  = os.environ.get('CROSS_VALIDATION', '0')  == '1'
+
+    print(f"[*] Options — Detailed: {detailed} | Save: {save} | CrossVal: {crossval}")
+
+    # Step 1: Preprocess
+    preprocessor = IDSPreprocessor()
+    X_train, X_test, y_train, y_test, df = preprocessor.preprocess(DATA_PATH)
+    preprocessor.save(PREPROCESSOR_PATH)
+
+    # Step 2: Train
     trainer = IDSModelTrainer()
     trainer.train_all(X_train, y_train)
 
-    # Step 3: Evaluate models
+    # Step 3: Evaluate
     trainer.evaluate_all(X_test, y_test)
-    trainer.print_classification_report(X_test, y_test)
 
-    # Step 4: Save best model and results
-    trainer.save_best_model(r'C:\Users\Chethan\Desktop\AI_IDS_Project\models\best_model.pkl')
-    trainer.save_results(r'C:\Users\Chethan\Desktop\AI_IDS_Project\models\results.json')
+    if detailed:
+        trainer.print_classification_report(X_test, y_test)
+
+    # Step 4: Cross Validation
+    if crossval:
+        print("\n[*] Running Cross Validation...")
+        from sklearn.model_selection import cross_val_score
+        scores = cross_val_score(
+            trainer.best_model, X_train, y_train, cv=5, scoring='f1'
+        )
+        print(f"[+] CV F1 Scores: {[round(s,4) for s in scores]}")
+        print(f"[+] Mean CV F1: {scores.mean():.4f} ± {scores.std():.4f}")
+
+    # Step 5: Save
+    if save:
+        trainer.save_best_model(MODEL_PATH)
+        trainer.save_results(RESULTS_PATH)
 
     print("\n[+] Training pipeline complete!")
-
 
 if __name__ == "__main__":
     main()

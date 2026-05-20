@@ -9,7 +9,7 @@ import joblib
 import json
 import sys
 import os
-sys.path.append(r'C:\Users\Chethan\Desktop\AI_IDS_PROJECT\src')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from preprocess import IDSPreprocessor, COLUMNS, ATTACK_CATEGORY
 
 class IDSPredictor:
@@ -25,7 +25,7 @@ class IDSPredictor:
     
         print("[*] Loading IDS model...")
         self.model = joblib.load(model_path)
-        self.preprocessor = IDSPredictor.load(preprocessor_path)
+        self.preprocessor = IDSPreprocessor.load(preprocessor_path)
         print("[+] Model loaded and ready!")
     def predict_from_file(self, filepath):
         """Predict on a full test file."""
@@ -90,11 +90,14 @@ class IDSPredictor:
 
 
 def main():
+    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    TEST_PATH = os.path.join(ROOT, 'data', 'raw', 'KDDTest+.txt')
+
     predictor = IDSPredictor()
 
     # Evaluate on test set
     print("\n[*] Evaluating on NSL-KDD test set...")
-    results = predictor.evaluate_on_test(r'C:\Users\Chethan\Desktop\AI_IDS_Project\data\raw\KDDTest+.txt')
+    results = predictor.evaluate_on_test(TEST_PATH)
 
     # Show sample predictions
     print("\n[SAMPLE PREDICTIONS]")
