@@ -10,14 +10,18 @@ import threading
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(PROJECT_ROOT, 'src'))
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from predict import IDSPredictor
 from functools import wraps
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__)
+
+app = Flask(__name__, static_folder='../dashboard', static_url_path='')
 CORS(app)
+@app.route('/')
+def index():
+    return send_from_directory('../dashboard', 'login.html')
 # ── API KEY ──────────────────────────────────────────────
 API_KEY = "oxvenom-ids-2026"
 

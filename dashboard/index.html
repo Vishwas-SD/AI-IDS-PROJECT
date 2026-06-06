@@ -242,18 +242,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .efmt-desc{font-size:10px;color:var(--text3);}
 
 
-/* LOGIN PAGE */
-.login-overlay{position:fixed;inset:0;background:#0d0f1a;display:flex;align-items:center;justify-content:center;z-index:99999;transition:opacity .5s;}
-.login-overlay.hide{opacity:0;pointer-events:none;}
-.login-box{background:#131525;border:1px solid #2a2d3e;border-radius:16px;padding:40px 36px;width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);}
-.login-logo{width:56px;height:56px;background:linear-gradient(135deg,#ff4b4b,#ff8c00);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;}
-.login-title{font-size:22px;font-weight:800;color:#e8eaf0;margin-bottom:4px;}
-.login-sub{font-size:12px;color:#6b7280;margin-bottom:28px;}
-.login-input{width:100%;padding:11px 14px;border:1px solid #2a2d3e;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#1a1d2e;color:#e8eaf0;margin-bottom:12px;transition:border .2s;}
-.login-input:focus{outline:none;border-color:#ff4b4b;}
-.login-btn{width:100%;padding:11px;background:#ff4b4b;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:4px;}
-.login-btn:hover{background:#e03e3e;}
-.login-err{color:#ef4444;font-size:12px;margin-top:8px;min-height:18px;}
+
 /* LOADING SCREEN */
 .loading-screen{position:fixed;inset:0;background:#0d0f1a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99998;transition:opacity .6s;}
 .loading-screen.hide{opacity:0;pointer-events:none;}
@@ -319,47 +308,6 @@ kbd{background:var(--tag-bg);border:1px solid var(--border);border-radius:5px;pa
 <body>
 
 
-<!-- LOGIN -->
-<div class="login-overlay" id="login-overlay">
-  <div class="login-box">
-    <div class="login-logo">🛡️</div>
-    <div class="login-title">OXVENOM</div>
-    <div class="login-sub">Network Intrusion Detection System</div>
-    <input class="login-input" type="text" id="login-user" placeholder="Username" value="admin"/>
-    <input class="login-input" type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="login-btn" onclick="doLogin()">Sign In →</button>
-    <div class="login-err" id="login-err"></div>
-    <div style="font-size:10px;color:#4b5563;margin-top:16px;">Default: admin / oxvenom2026</div>
-  </div>
-</div>
-
-<!-- LOADING SCREEN -->
-<div class="loading-screen" id="loading-screen" style="display:none;">
-  <div class="loading-logo">🛡️</div>
-  <div class="loading-title">OXVENOM</div>
-  <div class="loading-sub">Initializing detection systems...</div>
-  <div class="loading-bar-track"><div class="loading-bar-fill" id="load-bar"></div></div>
-  <div class="loading-status" id="load-status">Loading models...</div>
-</div>
-
-<!-- KEYBOARD SHORTCUTS MODAL -->
-<div class="modal-overlay" id="shortcuts-modal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal-box">
-    <div class="modal-title">⌨️ Keyboard Shortcuts</div>
-    <div class="shortcut-row"><span>Dashboard</span><kbd>D</kbd></div>
-    <div class="shortcut-row"><span>Model Training</span><kbd>T</kbd></div>
-    <div class="shortcut-row"><span>Monitoring</span><kbd>M</kbd></div>
-    <div class="shortcut-row"><span>Analytics</span><kbd>A</kbd></div>
-    <div class="shortcut-row"><span>Logs</span><kbd>L</kbd></div>
-    <div class="shortcut-row"><span>Export Center</span><kbd>E</kbd></div>
-    <div class="shortcut-row"><span>Terminal</span><kbd>X</kbd></div>
-    <div class="shortcut-row"><span>Toggle Dark Mode</span><kbd>K</kbd></div>
-    <div class="shortcut-row"><span>Toggle Sound</span><kbd>S</kbd></div>
-    <div class="shortcut-row"><span>Start/Stop Monitoring</span><kbd>Space</kbd></div>
-    <div class="shortcut-row"><span>Attack Scenario</span><kbd>F</kbd></div>
-    <div class="shortcut-row"><span>Close this panel</span><kbd>Esc</kbd></div>
-  </div>
-</div>
 
 <!-- SIDEBAR TOGGLE -->
 <div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">›</div>
@@ -686,6 +634,19 @@ kbd{background:var(--tag-bg);border:1px solid var(--border);border-radius:5px;pa
           <div class="sysinfo-item"><strong>Best Model:</strong> Random Forest 99.9%</div>
           <div class="sysinfo-item" style="background:var(--accent2)10;"><strong>Real-time Monitoring:</strong> ✅ Ready</div>
         </div>
+        <div class="set-section">
+        <div class="set-title">🔐 Account</div>
+        <button onclick="doLogout()" style="
+          padding: 10px 20px;
+          background: linear-gradient(135deg, #ff4b4b, #ff6a00);
+          color: #fff;
+          border: none;
+          border-radius: 9px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+        ">🚪 Logout</button>
       </div>
     </div>
 
@@ -821,6 +782,19 @@ kbd{background:var(--tag-bg);border:1px solid var(--border);border-radius:5px;pa
 <div class="toast-container" id="toast-container"></div>
 
 <script>
+  // Auth guard
+const sess = sessionStorage.getItem('oxvenom_session') || localStorage.getItem('oxvenom_session_persist');
+  if (!sess) {
+    window.location.href = 'login.html';
+  }
+
+function doLogout() {
+  sessionStorage.removeItem('oxvenom_session');
+  localStorage.removeItem('oxvenom_session_persist');
+  window.location.href = 'http://127.0.0.1:5000/';
+}
+
+
 const API_URL = "http://127.0.0.1:5000";
 const API_KEY = "oxvenom-ids-2026";
 const AUTH_HEADER = {'Content-Type':'application/json','X-API-Key':API_KEY};
